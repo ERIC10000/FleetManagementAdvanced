@@ -1,6 +1,7 @@
 
 import pymysql
 from functions import *
+import datetime
 connection = pymysql.connect(host='localhost', user='root',
                              password='', database='FleetDB')
 
@@ -38,9 +39,11 @@ def login():
                         otp = generate_random()
                         send_sms(decrypted_phone, "Your OTP is {}, Do not share with Anyone"
                                  .format(otp))
-                        sqlotp = "update users set otp = %s where email = %s"
+
+                        time = datetime.datetime.now()
+                        sqlotp = "update users set otp = %s, otptime = %s where email = %s"
                         cursor = connection.cursor()
-                        cursor.execute(sqlotp, (password_hash(otp), email))
+                        cursor.execute(sqlotp, (password_hash(otp), time, email))
                         connection.commit()
                         cursor.close()
                         # ACTIVATE SESSIONS
@@ -71,12 +74,23 @@ def confirm_otp():
             cursor = connection.cursor()
             cursor.execute(sql, (email))
             row = cursor.fetchone()
-            otp_hash = row[11]
-            status = password_verify(otp, otp_hash)
-            if status:
-                return redirect('/dashboard') # Two way Auth OK
+            otp_hash = row[11] #hashed OTP
+            otp_time = row[12] # Otp time
+            # convert otp time from str to datetime
+            prev_time = datetime.datetime.strptime(otp_time, '%Y-%m-%d %H:%M:%S.%f')
+            # get time now
+            time_now = datetime.datetime.now()
+            # find difference
+            diff = time_now - prev_time
+            if diff.total_seconds() > 60:
+                return render_template('confirm_otp.html', message="OTP Expired")
             else:
-                return render_template('confirm_otp.html', message="Wrong OTP")
+                status = password_verify(otp, otp_hash)
+                if status:
+                    return redirect('/dashboard') # Two way Auth OK
+                else:
+                    return render_template('confirm_otp.html', message="Wrong OTP")
+
         else:
              return render_template('confirm_otp.html')
 

@@ -1,16 +1,13 @@
-# This is a sample Python script.
+import datetime
+prev_time = "2022-09-21 12:48:12.274862"
+converted_prev_time = datetime.datetime.strptime(prev_time, '%Y-%m-%d %H:%M:%S.%f')
+print(converted_prev_time)
+print(type(converted_prev_time))
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+time_now = datetime.datetime.now()
+print(time_now)
+print(type(time_now))
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
-
-
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+diff = time_now  - converted_prev_time
+print("Diff ", diff.total_seconds())
