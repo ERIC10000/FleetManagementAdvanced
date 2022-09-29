@@ -74,8 +74,8 @@ def login():
                         print("DEC PHONE", decrypted_phone)
 
                         otp = generate_random()
-                        send_sms(decrypted_phone, "Your OTP is {}, Do not share with Anyone"
-                                 .format(otp))
+                        # send_sms(decrypted_phone, "Your OTP is {}, Do not share with Anyone"
+                        #          .format(otp))
 
                         time = datetime.datetime.now()
                         sqlotp = "update users set otp = %s, otptime = %s where email = %s"
@@ -236,6 +236,67 @@ def addType():
     else:
         return redirect('/login')
 
+@app.route('/addUser', methods = ['POST', 'GET'])
+def addUser():
+    if check_user() and check_role() == "admin":
+        if request.method == 'POST':
+            fname = request.form['fname']
+            lname = request.form['lname']
+            surname = request.form['surname']
+            gender = request.form['gender']
+            password = generate_random()
+            role = request.form['role']
+            phone = request.form['phone']
+            email = request.form['email']
+            regex = "^\+254\d{9}"
+            import re
+            if not fname:
+                return jsonify({'errorFname':'Please Enter First Name'})
 
+            elif not lname:
+                return jsonify({'errorLname':'Please Enter Last Name'})
+
+            elif not surname:
+                return jsonify({'errorSurname':'Please Enter Surname'})
+
+            elif not gender:
+                return jsonify({'errorGender':'Please Enter Gender'})
+
+            elif role not in ['admin', 'finance', 'operations', 'guest', 'service']:
+                return jsonify({'errorRole':'Invalid Role'})
+
+            elif not re.match(regex, phone) :
+                return jsonify({'errorPhone':'Please Enter Valid Phone i.e +254XXXXXXXXX'})
+
+            elif not validate_email(email):
+                return jsonify({'errorEmail':'Please Enter Valid Email'})
+
+            else:
+                sqlCheck = "select * from users where email = %s"
+                cursor = connection.cursor()
+                cursor.execute(sqlCheck, (email))
+                if cursor.rowcount  > 0:
+                    return jsonify({'errorEmail': 'Email Already Taken'})
+                else:
+                    cursor = connection.cursor()
+                    sql = '''insert into users(fname, lname, surname, gender, password, role, phone, email) 
+                    values(%s,%s,%s,%s,%s,%s,%s,%s)'''
+                    try:
+                        cursor.execute(sql, (fname, lname, surname, gender, password_hash(password),
+                                             role, encrypt(phone), email))
+
+                        connection.commit()
+                        message = '''Hello {}, You are signed in as {}, Login using Your Email 
+                        and Password {}'''.format(fname, role, password)
+                        send_sms(phone, message)
+                        return jsonify({'success': 'User Added'})
+                    except:
+                        connection.rollback()
+                        return jsonify({'error2': 'User Not Added'})
+
+        else:
+            return render_template('admin/adduser.html')
+    else:
+        return redirect('/login')
 
 app.run(debug=True)

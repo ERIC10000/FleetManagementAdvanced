@@ -7,6 +7,7 @@
                  type: 'POST',
                  url:"/addMake"
            })//end ajax
+
            //Wait for response from Python without reloading Page
            .done(function(data){
                  if(data.error1){

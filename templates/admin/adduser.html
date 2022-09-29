@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <!-- CSS only -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css"
+rel="stylesheet"
+integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT"
+crossorigin="anonymous">
+<script src="https://kit.fontawesome.com/bc4d7d5bce.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="{{url_for('static', filename = 'css/style.css')}}">
+
+</head>
+<body>
+    <div class="container-fluid">
+         <div class="row">
+                <!-- sidebar -->
+                  {% include 'sidebar.html'%}
+                <!-- end sidebar -->
+                <!-- top bar -->
+                <div class="col-md-10 col-sm-11 col-lg-9">
+                        {% include 'topbar.html'%}
+                        <div class="row">
+                              <h4>Add User</h4>
+                              <div class="col-md-6 card p-4 shadow ms-3">
+                                    <form id="userForm">
+                                      <input type="text" id="fname"
+                                             placeholder="Enter first name"
+                                             class="form-control">
+                                         <span style="color:red;" id="errorFname"></span><br>
+
+                                        <input type="text" id="lname"
+                                             placeholder="Enter last name"
+                                             class="form-control">
+                                        <span style="color:red;" id="errorLname"></span><br>
+
+                                        <input type="text" id="surname"
+                                             placeholder="Enter surname"
+                                             class="form-control">
+                                        <span style="color:red;" id="errorSurname"></span><br>
+
+                                        <label>Select Gender</label>
+                                        <input type="radio" name="gender" class="gender" value="Male"> Male
+                                        <input type="radio" name="gender" class="gender" value="Female"> Female <br>
+                                        <span style="color:red;" id="errorGender"></span><br>
+
+                                         <label>Select Role</label>
+                                        <select id="role">
+                                            <option value="admin">Admin</option>
+                                            <option value="cashier">Cashier</option>
+                                            <option value="operations">Operations</option>
+                                            <option value="guest">Guest</option>
+                                        </select>
+                                        <span style="color:red;" id="errorRole"></span><br>
+
+                                        <input type="text" id="phone"
+                                             placeholder="Enter Phone i.e +2547XXXXXXXX"
+                                             class="form-control">
+                                        <span style="color:red;" id="errorPhone"></span><br>
+
+                                         <input type="email" id="email"
+                                             placeholder="Enter valid Email"
+                                             class="form-control">
+                                        <span style="color:red;" id="errorEmail"></span><br>
+
+                                      <input type="submit" value="Add User"
+                                             onclick="return confirm('Are you sure Information
+                                             provided is Correct?');"
+                                             class="btn btn-info">
+                                  </form>
+                                  <br>
+                                  <!-- Below will show ajax responses -->
+                                  <span style="color:red" id="errorAlert"></span>
+                                  <span style="color:green" id="successAlert"></span>
+                              </div>
+                        </div>
+               </div>
+         </div>
+    </div>
+    <!-- above last div -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+    <script src="{{url_for('static', filename = 'js/adduser.js')}}"></script>
+<script>
+     $(document).ready(function(){
+          $("#mybutton").click(function(){
+                 $("#navigation").toggleClass("hide")
+          });
+     });
+</script>
+
+
+    <!-- JavaScript Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js"
+integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8"
+crossorigin="anonymous"></script>
+
+
+</body>
+</html>
