@@ -112,3 +112,29 @@ def validate_email(s):
       return True
    return False
 
+
+def passwordValidity(password):
+    # define a function to check password strength
+    if (len(password) < 8):
+        return "inValid Password less than 8"
+
+    elif not re.search("[a-z]", password):
+        return "inValid Password no small letter"
+
+    elif not re.search("[A-Z]", password):
+        return "inValid Password no caps"
+
+    elif not re.search("[0-9]", password):
+        return "inValid Password no numbers"
+
+    elif not re.search("[_@$]", password):
+        return "inValid Password no symbol"
+    else:
+        return True
+
+#print(passwordValidity("jNjkbj334kffdghfdh"))
+
+
+
+
+

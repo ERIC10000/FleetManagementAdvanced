@@ -121,6 +121,7 @@ def confirm_otp():
                     session['fname'] = row[1]  # fname
                     session['role'] = row[7]  # role
                     session['user_id'] = row[0]  # user_id
+                    session['img'] = row[13]  # user_id
                     return redirect('/') # Two way Auth OK
                 else:
                     return render_template('confirm_otp.html', message="Wrong OTP")
@@ -298,5 +299,77 @@ def addUser():
             return render_template('admin/adduser.html')
     else:
         return redirect('/login')
+
+
+
+@app.route('/profile')
+def profile():
+    if check_user():
+        user_id =  get_userid()
+        sql = "select * from users where user_id = %s"
+        cursor = connection.cursor()
+        cursor.execute(sql, (user_id))
+        row = cursor.fetchone()
+        return render_template("profile.html", row = row)
+    else:
+        return redirect('/login')
+
+
+@app.template_filter()    # this function is called in a template
+def data_decrypt(encrypted_data):
+    decrypted = decrypt(encrypted_data)
+    return decrypted
+
+
+
+@app.route('/change_password', methods = ['POST', 'GET'])
+def change_password():
+    if check_user():
+        if request.method == 'POST':
+            user_id = get_userid()
+            current_password = request.form['current_password']
+            new_password = request.form['new_password']
+            confirm_password = request.form['confirm_password']
+
+            sql = "select * from users where user_id = %s"
+            cursor = connection.cursor()
+            cursor.execute(sql, (user_id))
+            # get row containing the current password from DB
+            row = cursor.fetchone()
+            hashed_password = row[6]
+            status = password_verify(current_password, hashed_password)
+            if status:
+                 print("Current is okay")
+                 response = passwordValidity(new_password)
+                 print("tttttttttt", response)
+                 if response == True:
+                     print("New is okay")
+                     if new_password != confirm_password:
+                         return jsonify({'confirmWrong': "Password Do Not match!"})
+                     else:
+                         print("Confirm is okay")
+                         sql = "update users set password = %s where user_id = %s"
+                         cursor = connection.cursor()
+                         try:
+                            cursor.execute(sql, (password_hash(new_password) , user_id))
+                            connection.commit()
+                            return jsonify({'success': "Password Changed!"})
+                         except:
+                            connection.rollback()
+                            return jsonify({'error': "Password Was Not Changed!"})
+                 else:
+                     return jsonify({'newWrong': response})
+
+            else:
+                return jsonify({'currentWrong': 'Current Password is Wrong!'})
+
+        else:
+            return render_template('change_password.html')
+    else:
+        return redirect('/login')
+
+
+
+
 
 app.run(debug=True)

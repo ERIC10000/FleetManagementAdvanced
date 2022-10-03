@@ -25,11 +25,18 @@
                                                 <span class="badge">3</span>
                                             </a>
                                         </div>
+
                                         <div class="dropdown ">
                                             <span>
-                                                <img src="../static/images/admin.jpg" alt=""
+                                                 {%if session['img'] %}
+                                                <img src="../static/images/{{session['img']}}" alt=""
                                                 class="img-fluid rounded-circle shadow"
                                                 width="30">
+                                                 {% else %}
+                                                  <img src="../static/images/admin.jpg" alt=""
+                                                class="img-fluid rounded-circle shadow"
+                                                width="30">
+                                                 {% endif %}
                                                 <b>
                                                     {% if 'user_id' in session %}
                                                           {{ session['fname']}} : {{session['role']   }}
