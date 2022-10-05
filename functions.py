@@ -133,8 +133,14 @@ def passwordValidity(password):
         return True
 
 #print(passwordValidity("jNjkbj334kffdghfdh"))
+def check_phone(phone):
+    regex = "^\+254\d{9}"
+    if not re.match(regex, phone)  or len(phone) !=13:
+        return False
+    else:
+        return True
 
 
-
+#print(check_phone("+254729225700"))
 
 

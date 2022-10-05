@@ -43,9 +43,9 @@
                       $("#success").text(data.success).show();
                       $("#newWrong").hide();
                       $("#currentWrong").hide(); $("#error").hide(); $("#confirmWrong").hide();
-                       $("#current_password").val("");
-                       $("#new_password").val("");
-                       $("#confirm_password").val("");
+                      $("#current_password").val("");
+                      $("#new_password").val("");
+                      $("#confirm_password").val("");
                  }
            });//end done
 

@@ -2,19 +2,24 @@
 import pymysql
 from functions import *
 import datetime
+from werkzeug.utils import secure_filename
+import os
 connection = pymysql.connect(host='localhost', user='root',
                              password='', database='FleetDB')
 
 from flask import *
 app = Flask(__name__)
 app.secret_key = "QGTggg#$$#455_TThh@@ggg_jjj%%&^576" # session ids will be encrypted using this key
-
+UPLOAD_FOLDER = "static/images"
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = 4 * 1024 * 1024  # ACCEPT ONLY  < 4mbs
 # Functions to check sessions
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp'}
+def allowed_files(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
 
-
-
-
+# print(allowed_files("kdfldfkl.png"))
 def check_user():
     if 'user_id' in session:
         return True
@@ -368,6 +373,153 @@ def change_password():
     else:
         return redirect('/login')
 
+
+@app.route('/addOwner', methods = ['POST', 'GET'])
+def addOwner():
+    if check_user() and check_role() == "admin":
+        if request.method == 'POST':
+            fname = request.form['fname']
+            lname = request.form['lname']
+            surname = request.form['surname']
+            email = request.form['email']
+            address = request.form['address']
+            loc_id = request.form['loc_id']
+            # passport_pic = request.form['passport_pic']
+            id_no = request.form['id_no']
+            dob = request.form['dob']
+            phone = request.form['phone']
+            user_id = get_userid() # Logged in person
+            password = generate_random()  # Generate Random Password
+            files  = request.files.getlist("files[]")
+            for file in files:
+                if file and allowed_files(file.filename):
+                    filename = secure_filename(file.filename)
+                    uniquefilename = "{}{}".format(generate_random(), filename) # add random strings to filename
+                    # Upload the file using the random file name.
+                    try:
+                        file.save(os.path.join(app.config['UPLOAD_FOLDER'], uniquefilename))
+                        session['uniquefilename'] = uniquefilename
+                    except Exception as error:
+                        session['uniquefilename'] = ""
+                        print("Upload error", error)
+
+                else:
+                    return jsonify({"error":"Invalid File, Upload Only png, jpeg, "})
+
+            if not fname:
+                return jsonify({'error':'First name is Empty!'})
+            elif not lname:
+                return jsonify({'error':'Last name is Empty!'})
+            elif not validate_email(email):
+                return jsonify({'error':'Email is Invalid'})
+            elif not id_no:
+                return jsonify({'error':'Id no is Empty!'})
+            elif not dob:
+                return jsonify({'error':'Your DOB is invalid'})
+            elif not check_phone(phone):
+                return jsonify({'error':'Invalid Phone use +254XXXXXXXXX'})
+            else:
+                cursor = connection.cursor()
+                sql = '''insert into owners(fname,lname, surname, phone, email, address,
+                loc_id,passport_pic, id_no, dob, user_id, password) 
+                values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'''
+                try:
+                    cursor.execute(sql, (fname, lname, surname, encrypt(phone), email,
+                                         address, loc_id, session['uniquefilename'], id_no, dob,
+                                         user_id, password_hash(password)))
+                    connection.commit()
+                    message = '''Thank you for Joining FleetS, Download app from link 
+                    Login with your email and password: {} To track your Vehicles'''.format(password)
+                    send_sms(phone, message)
+                    return jsonify({'success': 'Owner Added'})
+                except:
+                    connection.rollback()
+                    return jsonify({'error2': 'Owner Not Added'})
+        else:
+            # get Locations from the database
+            locations = getlocations()
+            return render_template('admin/addowners.html', locations = locations)
+    else:
+        return redirect('/login')
+
+@app.route('/addDriver', methods = ['POST', 'GET'])
+def addDriver():
+    if check_user() and check_role() == "admin":
+        if request.method == 'POST':
+            fname = request.form['fname']
+            lname = request.form['lname']
+            surname = request.form['surname']
+            email = request.form['email']
+            dl_no = request.form['dl_no']
+            loc_id = request.form['loc_id']
+            dl_no_expiry = request.form['dl_no_expiry']
+            # passport_pic = request.form['passport_pic']
+
+            dob = request.form['dob']
+            phone = request.form['phone']
+            user_id = get_userid() # Logged in person
+            password = generate_random()  # Generate Random Password
+            files  = request.files.getlist("files[]")
+            for file in files:
+                if file and allowed_files(file.filename):
+                    filename = secure_filename(file.filename)
+                    uniquefilename = "{}{}".format(generate_random(), filename) # add random strings to filename
+                    # Upload the file using the random file name.
+                    try:
+                        file.save(os.path.join(app.config['UPLOAD_FOLDER'], uniquefilename))
+                        session['uniquefilename'] = uniquefilename
+                    except Exception as error:
+                        session['uniquefilename'] = ""
+                        print("Upload error", error)
+
+                else:
+                    return jsonify({"error":"Invalid File, Upload Only png, jpeg, "})
+
+            if not fname:
+                return jsonify({'error':'First name is Empty!'})
+            elif not lname:
+                return jsonify({'error':'Last name is Empty!'})
+            elif not validate_email(email):
+                return jsonify({'error':'Email is Invalid'})
+            elif not dl_no:
+                return jsonify({'error':'dl no is Empty!'})
+            elif not dob:
+                return jsonify({'error':'Your DOB is invalid'})
+            elif not check_phone(phone):
+                return jsonify({'error':'Invalid Phone use +254XXXXXXXXX'})
+            else:
+                cursor = connection.cursor()
+                sql = '''insert into drivers(fname,lname, surname, phone, email, 
+                dl_no,dl_no_expiry,passport_pic,
+                loc_id, dob, password, user_id) 
+                values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'''
+                try:
+                    cursor.execute(sql, (fname, lname, surname, encrypt(phone), email,
+                                         dl_no, dl_no_expiry, session['uniquefilename'], loc_id, dob,
+                                         password_hash(password),user_id))
+                    connection.commit()
+                    message = '''Thank you for Joining FleetS, Download app from link 
+                    Login with your email and password: {} To track your Assignments'''.format(password)
+                    send_sms(phone, message)
+                    return jsonify({'success': 'Owner Added'})
+                except:
+                    connection.rollback()
+                    return jsonify({'error2': 'Owner Not Added'})
+        else:
+            # get Locations from the database
+            locations = getlocations()
+            return render_template('admin/adddriver.html', locations = locations)
+    else:
+        return redirect('/login')
+
+# justpaste.it/9kvae
+# This function returns all locations
+def getlocations():
+    sql = "select * from locations order by loc_name asc"
+    cursor = connection.cursor()
+    cursor.execute(sql)
+    locations = cursor.fetchall()
+    return locations
 
 
 
