@@ -19,7 +19,7 @@ def allowed_files(filename):
     return '.' in filename and filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
 
-# print(allowed_files("kdfldfkl.png"))
+# print(allowed_files("kdfldfkl.pdf"))
 def check_user():
     if 'user_id' in session:
         return True
@@ -521,6 +521,187 @@ def getlocations():
     locations = cursor.fetchall()
     return locations
 
+
+def gettypes():
+    sql = "select * from vehicle_types order by type_name asc"
+    cursor = connection.cursor()
+    cursor.execute(sql)
+    types = cursor.fetchall()
+    return types
+
+def getmakes():
+    sql = "select * from vehicle_make order by make_name asc"
+    cursor = connection.cursor()
+    cursor.execute(sql)
+    makes = cursor.fetchall()
+    return makes
+
+
+
+
+@app.route('/getmodels', methods = ['POST', 'GET'])
+def getmodels():
+    make_id =  request.form['make_id']
+    sql = "select * from vehicle_model where make_id =%s order by model_name asc"
+    cursor = connection.cursor(pymysql.cursors.DictCursor)
+    cursor.execute(sql, (make_id))
+    models = cursor.fetchall()
+    if cursor.rowcount == 0:
+        return jsonify({"error":"No Models"})
+    else:
+        return jsonify(models)
+
+
+import pymysql.cursors
+# ====================get owners =======
+@app.route('/ownerlivesearch', methods = ['POST', 'GET'])
+def ownerlivesearch():
+    if check_user() and check_role() == "admin":
+        cursor = connection.cursor(pymysql.cursors.DictCursor)
+        if request.method == 'POST':
+            search_word = request.form['search_word']
+            if search_word =='':
+                sql = "select * from owners order by owner_id desc"
+                cursor.execute(sql)
+                owners = cursor.fetchall()
+                count = cursor.rowcount
+                print(owners)
+                return jsonify({'htmlresponse': render_template('views/ownerresponse.html',
+                                                        owners = owners, count = count, locations = getlocations())})
+            else:
+                sql = ''' select * from owners WHERE phone  LIKE '%{}%' or email LIKE '%{}%'  or 
+                surname LIKE '%{}%' ORDER BY owner_id DESC  '''.format(search_word, search_word, search_word)
+                cursor.execute(sql)
+                owners = cursor.fetchall()
+                count = cursor.rowcount
+                print(owners)
+                return jsonify({'htmlresponse': render_template('views/ownerresponse.html',
+                                                                  owners=owners, count=count,
+                                                                locations = getlocations())})
+        else:
+            return render_template('views/ownerUI.html')
+    else:
+        return redirect('/login')
+
+@app.route('/driverlivesearch', methods = ['POST', 'GET'])
+def driverlivesearch():
+    if check_user() and check_role() == "admin":
+        cursor = connection.cursor(pymysql.cursors.DictCursor)
+        if request.method == 'POST':
+            search_word = request.form['search_word']
+            if search_word =='':
+                sql = "select * from drivers order by driver_id desc"
+                cursor.execute(sql)
+                owners = cursor.fetchall()
+                count = cursor.rowcount
+                print(owners)
+                return jsonify({'htmlresponse': render_template('views/driverresponse.html',
+                                                        owners = owners, count = count, locations = getlocations())})
+            else:
+                sql = ''' select * from drivers WHERE phone  LIKE '%{}%' or email LIKE '%{}%'  or 
+                surname LIKE '%{}%' ORDER BY driver_id DESC  '''.format(search_word, search_word, search_word)
+                cursor.execute(sql)
+                owners = cursor.fetchall()
+                count = cursor.rowcount
+                print(owners)
+                return jsonify({'htmlresponse': render_template('views/driverresponse.html',
+                                                                  owners=owners, count=count,
+                                                                locations = getlocations())})
+        else:
+            return render_template('views/driverUI.html')
+    else:
+        return redirect('/login')
+
+
+@app.route('/addVehicle/<owner_id>', methods = ['POST', 'GET'])
+def addVehicle(owner_id):
+    # owner id to be encrypted
+    if check_user() and check_role() == "admin":
+        if request.method == 'POST':
+            reg_no = request.form['reg_no']
+            type_id = request.form['type_id']
+            make_id = request.form['make_id']
+            model_id = request.form['model_id']
+            capacity_id = request.form['capacity_id']
+            color = request.form['color']
+            # passport_pic = request.form['passport_pic']
+            weight = request.form['weight']
+            no_of_pass = request.form['no_of_pass']
+            year = request.form['year']
+            chassis_no = request.form['chassis_no']
+            user_id = get_userid() # Logged in person
+            files  = request.files.getlist("files[]")
+            for file in files:
+                if file and allowed_files(file.filename):
+                    filename = secure_filename(file.filename)
+                    uniquefilename = "{}{}".format(generate_random(), filename) # add random strings to filename
+                    # Upload the file using the random file name.
+                    try:
+                        file.save(os.path.join(app.config['UPLOAD_FOLDER'], uniquefilename))
+                        session['uniquefilename'] = uniquefilename
+                    except Exception as error:
+                        session['uniquefilename'] = ""
+                        print("Upload error", error)
+
+                else:
+                    return jsonify({"error":"Invalid File, Upload Only png, jpeg, "})
+
+            if not reg_no:
+                return jsonify({'error':'Reg no is Empty!'})
+            elif not chassis_no:
+                return jsonify({'error':'chasis is Empty!'})
+            elif not year or len(year) != 4:
+                return jsonify({'error':'Year is Invalid'})
+            elif not weight:
+                return jsonify({'error':'Weight is Empty!'})
+            elif not color:
+                return jsonify({'error':'Color is Empty'})
+            elif not capacity_id:
+                return jsonify({'error':'Capacity'})
+            elif not no_of_pass:
+                return jsonify({'error':'No of Pass is Empty'})
+            else:
+                cursor = connection.cursor()
+                sql = '''insert into vehicles(reg_no,type_id, make_id, model_id, 
+                capacity_id, color,
+                weight,no_of_pass, vehicle_pic, year, owner_id, chassis_no,
+                user_id) 
+                values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'''
+                try:
+                    cursor.execute(sql, (reg_no, type_id, make_id, model_id, capacity_id,
+                                         color, weight, no_of_pass, session['uniquefilename'], year, owner_id,
+                                         chassis_no, user_id))
+                    connection.commit()
+                    sql = "select * from owners where owner_id = %s"
+                    cursor = connection.cursor()
+                    cursor.execute(sql, (owner_id))
+                    row = cursor.fetchone()
+                    phone = decrypt(row[4])
+                    message = '''Dear {}, Your Vehicle {} Has added to FleetS, Please 
+                    Our App on Link to track your Vehicles'''.format(row[1], reg_no)
+                    send_sms(phone, message)
+                    return jsonify({'success': 'Vehicle Added'})
+                except:
+                    connection.rollback()
+                    return jsonify({'error2': 'Vehicle Not Added'})
+        else:
+            # get Locations from the database()
+            return render_template('admin/addvehicles.html', types = gettypes(),
+                                   makes = getmakes(), owner_id = owner_id)
+    else:
+        return redirect('/login')
+
+
+@app.route('/viewvehicles/<owner_id>')
+def viewvehicles(owner_id):
+    sql = "select * from vehicles where owner_id = %s"
+    cursor = connection.cursor()
+    cursor.execute(sql, (owner_id))
+    if cursor.rowcount == 0:
+        return render_template('viewvehicles.html', message = "No vehicles")
+    else:
+        vehicles = cursor.fetchall()
+        return render_template('viewvehicles.html', vehicles = vehicles)
 
 
 

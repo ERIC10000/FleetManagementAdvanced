@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <!-- CSS only -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css"
+rel="stylesheet"
+integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT"
+crossorigin="anonymous">
+<script src="https://kit.fontawesome.com/bc4d7d5bce.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="{{url_for('static', filename = 'css/style.css')}}">
+</head>
+<body>
+    <div class="container-fluid">
+         <div class="row">
+                <!-- sidebar -->
+                  {% include 'sidebar.html'%}
+                <!-- end sidebar -->
+                <!-- top bar -->
+                <div class="col-md-10 col-sm-11 col-lg-9">
+                        {% include 'topbar.html'%}
+                        <div class="row">
+                              <h4>Add Vehicle for Owner {{owner_id}}</h4>
+                               <div class="d-flex justify-content-end pe-4">
+                                     <a href="/vihiclelivesearch">View Vehicles</a>
+                              </div>
+                              <br><br>
+                              <div class="col-md-12 card p-4 shadow ms-3">
+                                    <form id="vehicleForm">
+                                        <section class="row">
+                                            <div class="col-md-4">
+                                                <input type="hidden" id="owner_id" value="{{owner_id}}">
+                                                <input type="text" id="reg_no"
+                                                     placeholder="Enter Reg no"
+                                                     class="form-control"><br>
+                                                    <b>Select Type</b> <br>
+                                                    {% if types %}
+                                                    <select id="type_id" class="form-control form-select">
+                                                         <option value="none" selected disabled hidden>--Select Car Type--</option>
+                                                          {% for type in types %}
+                                                              <option value="{{type[0]}}">{{type[1]}}</option>
+                                                          {% endfor %}
+                                                    </select>
+                                                    {% endif %} <br>
+                                                   <b>Select Make</b> <br>
+                                                    {% if makes %}
+                                                    <select id="make_id" class="form-control form-select">
+                                                         <option value="none" selected disabled hidden>--Select Car Make--</option>
+                                                          {% for make in makes %}
+                                                              <option value="{{make[0]}}">{{make[1]}}</option>
+                                                          {% endfor %}
+                                                    </select>
+                                                    {% endif %} <br>
+                                                <b>Select Model</b><br>
+                                                <select name="" id="model_id" class="form-control form-select">
+                                                        <option value="none" selected disabled hidden>--Select Car Models--</option>
+                                                </select>
+                                                <br>
+                                                 <input type="text" id="capacity_id"
+                                                     placeholder="Enter Capacity i.e 1500"
+                                                     class="form-control"><br>
+                                                 <input type="text" id="color"
+                                                     placeholder="Enter Color i.e Blue"
+                                                     class="form-control"><br>
+
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                   <input type="text" id="weight"
+                                                     placeholder="Enter Weight"
+                                                     class="form-control"> <br>
+                                                <input type="text" id="no_of_pass"
+                                                     placeholder="Enter No of Passenger"
+                                                     class="form-control"> <br>
+
+                                                    <input type="text" id="year"
+                                                     placeholder="Enter Year"
+                                                     class="form-control"> <br>
+
+                                                 <input type="text" id="chassis_no"
+                                                     placeholder="Enter Chassis No"
+                                                     class="form-control"> <br>
+
+                                                <label for="passport_pic">Upload a Photo</label> <br>
+                                                  <input type="file" id="passport_pic"  name="files[]" multiple="multiple"
+                                                         class="form-control" required><br>
+
+                                                  <input type="submit" value="Add Vehicle"
+                                                         class="btn btn-info text-white">
+                                            </div>
+                                      </section>
+                                         <span style="color:red; background:grey;" id="error"></span>
+                                         <span style="color:green;background:grey;" id="success"></span>
+                                         <span style="color:red;background:grey;" id="error2"></span>
+                                  </form>
+                                  <br>
+
+                              </div>
+                        </div>
+               </div>
+         </div>
+    </div>
+    <!-- above last div -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+    <script src="{{url_for('static', filename = 'js/addvehicle.js')}}"></script>
+
+     <script>
+        $(document).ready(function(){
+             $("#make_id").change(function(){
+                   var make_id = $(this).val();
+                   $.ajax({
+                       url:"/getmodels",
+                       type:"post",
+                       data: {make_id:make_id},
+                       dataType:"json",
+                       success: function(response){
+                             if(response.error)   {
+                                 $("#model_id").empty();
+                                 $("#model_id").append("<option value='none'>No Models</option>");
+                             }
+
+                             else {
+                                 var len = response.length;
+                                 $("#model_id").empty();
+                                 for(let i = 0; i < len; i++ ){
+                                     let model_id = response[i]['model_id']
+                                     let model_name = response[i]['model_name']
+                                     $("#model_id").append("<option value='"+model_id+"'>"+model_name+"</option>");
+                                 }
+
+                             }//end else
+
+                       }//end success
+                   });
+             });
+        });
+</script>
+
+
+
+
+<script>
+     $(document).ready(function(){
+          $("#mybutton").click(function(){
+                 $("#navigation").toggleClass("hide")
+          });
+     });
+</script>
+
+
+    <!-- JavaScript Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js"
+integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8"
+crossorigin="anonymous"></script>
+
+
+</body>
+</html>
