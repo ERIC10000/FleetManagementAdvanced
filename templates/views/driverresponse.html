@@ -33,25 +33,32 @@
                 <th>DOB</th>
                 <th>PassPort</th>
             </tr>
-            {% for owner in owners %}
+            {% for driver in drivers %}
                  <tr>
-                     <td>{{owner.fname}}</td>
-                     <td>{{owner.lname}}</td>
-                     <td>{{owner.surname}}</td>
-                     <td>{{owner.phone | data_decrypt }}</td>
-                     <td>{{owner.email}}</td>
-                     <td>{{owner.dl_no}}</td>
-                     <td>{{owner.dl_no_expiry}}</td>
+                     <td>{{driver.fname}}</td>
+                     <td>{{driver.lname}}</td>
+                     <td>{{driver.surname}}</td>
+                     <td>{{driver.phone | data_decrypt }}</td>
+                     <td>{{driver.email}}</td>
+                     <td>{{driver.dl_no}}</td>
+                     <td>{{driver.dl_no_expiry}}</td>
                      <td>
                            {% for location in locations %}
-                              {% if location[0] == owner.loc_id %}
+                              {% if location[0] == driver.loc_id %}
                                     {{location[1]}}
                               {% endif %}
                           {% endfor%}
                      </td>
-                     <td>{{owner.dob}}</td>
-                     <td><img src="../static/images/{{owner.passport_pic}}" alt="" width="50"></td>
-                     <td><a href="">Give Vehicle</a></td>
+                     <td>{{driver.dob}}</td>
+                     <td><img src="../static/images/{{driver.passport_pic}}" alt="" width="50"></td>
+                     {% if driver.status == 'Not Allocated'%}
+                     <td><a href="/vehiclelivesearch/{{driver.driver_id}}">Assign Vehicle</a></td>
+                     {% elif driver.status == 'Allocated' %}
+                     <td><span class="badge bg-success">Allocated</span>
+                         <a href="/allocatedvehicle/{{driver.driver_id}}">View Car</a>
+                     </td>
+                     
+                     {% endif %}
                  </tr>
             {% endfor %}
 

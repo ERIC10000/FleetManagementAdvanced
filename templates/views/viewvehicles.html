@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicles</title>
+    <!-- CSS only -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css"
+rel="stylesheet"
+integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT"
+crossorigin="anonymous">
+<script src="https://kit.fontawesome.com/bc4d7d5bce.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="{{url_for('static', filename = 'css/style.css')}}">
+</head>
+<body>
+    <div class="container-fluid">
+         <div class="row">
+                <!-- sidebar -->
+                  {% include 'sidebar.html'%}
+                <!-- end sidebar -->
+                <!-- top bar -->
+                <div class="col-md-10 col-sm-11 col-lg-9">
+                        {% include 'topbar.html'%}
+                        <div class="row">
+                              <h4>Vehicles</h4>
+
+                              <br><br>
+
+                            <a href="/ownerlivesearch">Owners List</a>
+                          <div class="col-md-12 card p-4 shadow ms-3">
+                                 <span style="color:red;">{{message}}</span>
+                                    <table class="table">
+                                         <tr>
+                                             <th>Reg No</th>
+                                             <th>Type</th>
+                                             <th>Make</th>
+                                             <th>Model</th>
+                                             <th>Capacity</th>
+                                             <th>Pass</th>
+                                             <th>Year</th>
+                                             <th>Photo</th>
+                                         </tr>
+
+                                        {% for vehicle in vehicles %}
+                                             <tr>
+                                                 <td>{{vehicle.reg_no}}</td>
+                                                 <td>
+                                                     {% for type in types %}
+                                                          {% if vehicle.type_id == type[0] %}
+                                                                 {{type[1]}}
+                                                          {% endif %}
+                                                     {% endfor %}
+                                                 </td>
+                                                 <td>
+                                                     {% for make in makes %}
+                                                          {% if vehicle.make_id == make[0] %}
+                                                                 {{make[1]}}
+                                                          {% endif %}
+                                                     {% endfor %}
+                                                 </td>
+                                                 <td>
+                                                     {% for model in models %}
+                                                          {% if vehicle.model_id == model[0] %}
+                                                                 {{model[2]}}
+                                                          {% endif %}
+                                                     {% endfor %}
+                                                 </td>
+                                                 <td>{{vehicle.capacity_id}}</td>
+                                                 <td>{{vehicle.no_of_pass}}</td>
+                                                 <td>{{vehicle.year}}</td>
+                                                 <td><img src="../static/images/{{vehicle.vehicle_pic}}" width="100"></td>
+                                                  {% if vehicle.status == 'Not Allocated'%}
+                                                 <td>
+                                                     <a href="/allocatedriver/{{vehicle.reg_no}}" onclick="return confirm('Are you sure');">Assign</a>
+                                                 </td>
+                                                  {% elif vehicle.status == 'Allocated' %}
+                                                 <td><span class="badge bg-success">Allocated</span></td>
+                                                  {% endif %}
+                                             </tr>
+                                        {% endfor %}
+                                    </table>
+
+                          </div>
+                        </div>
+               </div>
+         </div>
+    </div>
+    <!-- above last div -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+    <script src="{{url_for('static', filename = 'js/vehiclelist.js')}}"></script>
+<script>
+     $(document).ready(function(){
+          $("#mybutton").click(function(){
+                 $("#navigation").toggleClass("hide")
+          });
+     });
+</script>
+
+
+    <!-- JavaScript Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js"
+integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8"
+crossorigin="anonymous"></script>
+
+
+</body>
+</html>

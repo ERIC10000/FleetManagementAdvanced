@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Owners</title>
+    <title>Vehicles</title>
     <!-- CSS only -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css"
 rel="stylesheet"
@@ -23,28 +23,24 @@ crossorigin="anonymous">
                 <div class="col-md-10 col-sm-11 col-lg-9">
                         {% include 'topbar.html'%}
                         <div class="row">
-                              <h4>Drivers</h4>
-                               <div class="d-flex justify-content-end pe-4">
-                                     <a href="/addDriver">Add New Driver</a>
-                              </div>
+                              <h4>Vehicles</h4>
+
                               <br><br>
+
+
                               <div class="col-md-12 card p-4 shadow ms-3">
-                                  {% with messages = get_flashed_messages(with_categories=true) %}
-                                          {% if messages %}
-                                            <ul class=flashes>
-                                            {% for category, message in messages %}
-                                              <li class="{{ category }}">{{ message }}</li>
-                                            {% endfor %}
-                                            </ul>
-                                          {% endif %}
-                                        {% endwith %}
-                                      <input type="text" id="search_word" name="search_word"
-                                             placeholder="Search by phone, email, surname..."
-                                             class="form-control">
-                                      <br>
-                                      <div id="result">
-                                           <!--   ownerresponse.html will load here  -->
-                                      </div>
+                                       {% if session['driver_id'] and session['driver_name'] %}
+                                           <b>Driver ID: {{session['driver_id']}}</b> <br>
+                                           <b>Driver Name: {{session['driver_name']}}</b> <br>
+                                          <input type="text" id="search_word" name="search_word"
+                                                 placeholder="Search by Reg No..."
+                                                 class="form-control"> <br>
+
+                                          <input type="hidden" id="driver_id" value="{{session['driver_id']}}">
+                                          <div id="result">
+                                               <!--   ownerresponse.html will load here  -->
+                                          </div>
+                                  {% endif %}
                               </div>
                         </div>
                </div>
@@ -52,7 +48,7 @@ crossorigin="anonymous">
     </div>
     <!-- above last div -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
-    <script src="{{url_for('static', filename = 'js/driverlist.js')}}"></script>
+    <script src="{{url_for('static', filename = 'js/vehiclelist.js')}}"></script>
 <script>
      $(document).ready(function(){
           $("#mybutton").click(function(){
