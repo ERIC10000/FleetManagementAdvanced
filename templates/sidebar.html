@@ -17,46 +17,62 @@
                                              <span>Home</span>
                                          </a>
                                     </li>
-
+                                     {% if session['role'] == 'operations' or session['role'] == 'admin' %}
                                     <li>
-                                        <hr>
-                                        <h6 class="text-white">Operations</h6>
+                                             <hr>
+                                             <h6 class="text-white">Operations</h6>
                                               <div class="accordion">
                                             <div class="accordhhion-item">
                                                 <a href="" style="font-size: 12px; padding: 5px 5px;"
                                                 data-bs-toggle="collapse" data-bs-target="#collapseOne"
                                                 aria-expanded="true" aria-controls="collapseOne">
-                                                    <span>Driver/Car Management <i class="fas fa-angle-down"
+                                                    <span>Management <i class="fas fa-angle-down"
                                                         style="float: right;"></i></span>
                                                 </a>
-
                                                 <div id="collapseOne" class="accordion-collapse collapse show"
                                                 aria-labelledby="headingOne" data-bs-parent="#accordionExample">
                                                   <div class="accordion-body">
-                                                    <a href="" style="padding: 5px 5px; font-size: 11px;">
+                                                    <a href="/assignmentslivesearch" style="padding: 5px 5px; font-size: 11px;">
                                                         <i class="fas fa-car-side" style='color:white'></i>
-                                                        <span>Assign Drivers</span>
+                                                        <span>Assignments</span>
                                                     </a>
-
-                                                    <a href="" style="padding: 5px 5px; font-size: 11px;">
-                                                        <i class="fas fa-car-side" style='color:white'></i>
-                                                        <span>Assign Task</span>
-                                                    </a>
-
-                                                    <a href="" style="padding: 5px 5px; font-size: 11px;">
-                                                        <i class="fas fa-car-side" style='color:white'></i>
-                                                        <span>Billing</span>
-                                                    </a>
-
                                                   </div>
                                                 </div>
                                               </div>
                                            </div>
                                     </li>
+                                    {% endif %}
 
 
 
+                                     {% if session['role'] == 'operations' or session['role'] == 'admin' or session['role'] == 'mechanic'%}
                                     <li>
+                                             <hr>
+                                              <div class="accordion">
+                                            <div class="accordhhion-item">
+                                                <a href="" style="font-size: 12px; padding: 5px 5px;"
+                                                data-bs-toggle="collapse" data-bs-target="#collapseOne4545"
+                                                aria-expanded="true" aria-controls="collapseOne4545">
+                                                    <h6>Servicing <i class="fas fa-angle-down"
+                                                        style="float: right;"></i></h6>
+                                                </a>
+                                                <div id="collapseOne4545" class="accordion-collapse collapse show"
+                                                aria-labelledby="headingOne4545" data-bs-parent="#accordionExample">
+                                                  <div class="accordion-body">
+                                                    <a href="/serviceslivesearch" style="padding: 5px 5px; font-size: 11px;">
+                                                        <i class="fas fa-wrench" style='color:white'></i>
+                                                        <span style="font-size:12px;">Services</span>
+                                                    </a>
+                                                  </div>
+                                                </div>
+                                              </div>
+                                           </div>
+                                    </li>
+                                    {% endif %}
+
+
+                                     {% if session['role'] == 'admin'%}
+                                           <li>
                                         <hr>
                                         <h6 class="text-white">Revenue Reports</h6>
                                            <div class="accordion">
@@ -85,20 +101,23 @@
                                               </div>
                                            </div>
                                     </li>
+                                     {% endif %}
 
-                                    <li>
-                                         <hr>
-                                         <h6 class="text-white">My Profile</h6>
-                                         <a href="/profile" style="padding: 10px 10px; font-size: small;">
-                                            <i class="far fa-address-card" style='color:white'></i>
-                                            <span>Profile</span>
-                                         </a>
+                                      {% if session['role'] == 'operations' or session['role'] == 'admin' or session['role'] == 'mechanic'%}
+                                        <li>
+                                             <hr>
+                                             <h6 class="text-white">My Profile</h6>
+                                             <a href="/profile" style="padding: 10px 10px; font-size: small;">
+                                                <i class="far fa-address-card" style='color:white'></i>
+                                                <span>Profile</span>
+                                             </a>
 
-                                         <a href="/change_password" style="padding: 10px 10px; font-size: small;">
-                                            <i class="far fa-solid fa-pen-to-square-" style='color:white'></i>
-                                            <span>Change Password</span>
-                                         </a>
-                                    </li>
+                                             <a href="/change_password" style="padding: 10px 10px; font-size: small;">
+                                                <i class="far fa-solid fa-pen-to-square-" style='color:white'></i>
+                                                <span>Change Password</span>
+                                             </a>
+                                        </li>
+                                     {% endif %}
 
                                       {% if session['role'] == 'operations' or session['role'] == 'admin' %}
                                         <li>
@@ -107,11 +126,6 @@
                                             <a href="/driverlivesearch" style="padding: 10px 10px; font-size: small;">
                                                <i class="fas fa-user-check" style='color:white'></i>
                                                <span>View Driver</span>
-                                            </a>
-
-                                            <a href="" style="padding: 10px 10px; font-size: small;">
-                                               <i class="fas fa-car-side" style='color:white'></i>
-                                               <span>View Vehicles</span>
                                             </a>
 
                                             <a href="/ownerlivesearch" style="padding: 10px 10px; font-size: small;">

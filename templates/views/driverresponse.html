@@ -56,8 +56,11 @@
                      {% elif driver.status == 'Allocated' %}
                      <td><span class="badge bg-success">Allocated</span>
                          <a href="/allocatedvehicle/{{driver.driver_id}}">View Car</a>
+                         <br>
+                         <a href="/assign/{{driver.driver_id}}" onclick="return confirm('Sure');">Assign</a>
+                         <br>
+                         <a href="/reallocate/{{driver.driver_id}}" onclick="return confirm('Sure');">Remove</a>
                      </td>
-                     
                      {% endif %}
                  </tr>
             {% endfor %}

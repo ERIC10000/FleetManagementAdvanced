@@ -75,7 +75,11 @@ crossorigin="anonymous">
                                                      <a href="/allocatedriver/{{vehicle.reg_no}}" onclick="return confirm('Are you sure');">Assign</a>
                                                  </td>
                                                   {% elif vehicle.status == 'Allocated' %}
-                                                 <td><span class="badge bg-success">Allocated</span></td>
+                                                 <td><span class="badge bg-success">Allocated</span>
+                                                     <br>
+                                                     <a href="/send_service/{{vehicle.reg_no}}">Send Service</a>
+                                                 </td>
+
                                                   {% endif %}
                                              </tr>
                                         {% endfor %}

@@ -868,4 +868,178 @@ def allocatedvehicle(driver_id):
         return redirect('/login')
 
 
+
+@app.route('/reallocate/<driver_id>')
+def reallocate(driver_id):
+    if check_user() and check_role() == 'admin':
+        sql = "select * from driver_allocations where driver_id = %s and allocation_status = %s"
+        cursor = connection.cursor()
+        cursor.execute(sql, (driver_id, 'active'))
+        if cursor.rowcount == 0:
+            flash("Failed! Driver Not Allocated.", 'alert bg-danger')
+            return redirect('/driverlivesearch')
+        else:
+            row = cursor.fetchone()
+            reg_no = row[2] # Current vehicle
+            # Update to Inactive
+            sqlUpdate1 = "update driver_allocations set allocation_status = %s where driver_id = %s"
+            cursorUpdate1 = connection.cursor()
+            cursorUpdate1.execute(sqlUpdate1, ('inactive', driver_id))
+            connection.commit()
+
+            sqlUpdate2 = "update drivers set status = %s where driver_id = %s"
+            cursorUpdate2 = connection.cursor()
+            cursorUpdate2.execute(sqlUpdate2, ('Not Allocated', driver_id))
+            connection.commit()
+
+            sqlUpdate3 = "update vehicles set status = %s where reg_no = %s"
+            cursorUpdate3 = connection.cursor()
+            cursorUpdate3.execute(sqlUpdate3, ('Not Allocated', reg_no))
+            connection.commit()
+            flash("Success! Driver Re Allocated.", 'alert bg-success text-white')
+            return redirect('/driverlivesearch')
+    else:
+        return redirect('/login')
+
+# javascripttutorial.net/javascript-dom/javascript-add-remove-options
+@app.route('/assign/<driver_id>', methods = ['POST', 'GET'])
+def assign(driver_id):
+    if check_user() and check_role() == 'admin':
+        if request.method == 'POST':
+            reg_no = request.form['reg_no']
+            from1 = request.form['from']
+            to = request.form['to']
+            scheduled_date = request.form['scheduled_date']
+            scheduled_time = request.form['scheduled_time']
+            sql = '''insert into vehicle_task_allocation(`reg_no`, `driver_id`, `from`, `to`,
+            `scheduled_date`, `scheduled_time`)values(%s, %s, %s, %s, %s, %s)'''
+            cursor = connection.cursor()
+            try:
+                cursor.execute(sql, (reg_no, driver_id, from1, to, scheduled_date, scheduled_time))
+                connection.commit()
+                # use driver id to get driver phone number from driver table
+                # decrypt the phone number, send an sms to Notify the driver of this assignment
+                sql = " select * from drivers where driver_id = %s"
+                cursor = connection.cursor()
+                cursor.execute(sql, driver_id)
+                row = cursor.fetchone()
+                fname = row[1]
+                phone = decrypt(row[4])
+                message = '''Dear {}, You have been assigned a Trip from {} to {} 
+                on {} at {}. Thank you'''.format(fname, from1, to, scheduled_date, scheduled_time)
+                send_sms(phone, message)
+                return jsonify({'success': 'Assignment Added'})
+            except:
+                return jsonify({'error': 'Assignment Failed'})
+        else:
+            sql = "select * from driver_allocations where driver_id = %s and allocation_status=%s"
+            cursor = connection.cursor()
+            cursor.execute(sql, (driver_id, 'active'))
+            if cursor.rowcount == 0:
+                flash("Failed! Driver Not Allocated.", 'alert bg-danger')
+                return redirect('/driverlivesearch')
+            else:
+                row = cursor.fetchone()
+                reg_no = row[2] # Current vehicle
+                session['driver_id'] = driver_id
+                session['reg_no'] = reg_no
+                return render_template('admin/assign.html')
+    else:
+        return redirect('/login')
+
+
+@app.route('/assignmentslivesearch', methods=['POST', 'GET'])
+def assignmentslivesearch():
+    if check_user() and check_role() == "admin" or check_role() == "operations":
+        cursor = connection.cursor(pymysql.cursors.DictCursor)
+        if request.method == 'POST':
+            search_word = request.form['search_word']
+            if search_word == '':
+                sql = "select * from vehicle_task_allocation order by task_id desc"
+                cursor.execute(sql)
+                assignments = cursor.fetchall()
+                count = cursor.rowcount
+                print(assignments)
+                return jsonify({'htmlresponse': render_template('views/assignmentsresponse.html',
+                                                                assignments=assignments, count=count)})
+            else:
+                sql = ''' select * from vehicle_task_allocation WHERE reg_no  LIKE '%{}%' 
+                or trip_complete_status LIKE '%{}%'  or 
+                scheduled_date LIKE '%{}%'  or driver_id LIKE '%{}%'  
+                ORDER BY task_id DESC  '''.format(search_word, search_word, search_word, search_word)
+                cursor.execute(sql)
+                assignments = cursor.fetchall()
+                count = cursor.rowcount
+                print(assignments)
+                return jsonify({'htmlresponse': render_template('views/assignmentsresponse.html',
+                                                                assignments=assignments, count=count)})
+        else:
+            return render_template('views/assignmentsUI.html')
+    else:
+        return redirect('/login')
+
+
+
+@app.route('/send_service/<reg_no>', methods = ['POST','GET'])
+def send_service(reg_no):
+    if check_role() and check_role() =='admin' or check_role() =='operations':
+        if request.method =='POST':
+            scheduled_date = request.form['scheduled_date']
+            scheduled_time = request.form['scheduled_time']
+            services = str(request.form.getlist('services[]'))
+            print(services)
+            sql = '''insert into vehicle_service(reg_no, scheduled_date, scheduled_time, services)
+            values (%s, %s, %s, %s)'''
+            cursor = connection.cursor()
+            # try:
+            cursor.execute(sql, (reg_no, scheduled_date, scheduled_time, services))
+            connection.commit()
+            return jsonify({'success': 'Service Scheduled '})
+            # except:
+            #     return jsonify({'error': 'Not Added '})
+        else:
+            session['reg_no'] = reg_no
+            return render_template('admin/send_service.html')
+    else:
+        return redirect('/login')
+
+
+
+@app.route('/serviceslivesearch', methods=['POST', 'GET'])
+def serviceslivesearch():
+    if check_user() and check_role() == "admin" or check_role() == "operations" \
+            or check_role() == "mechanic":
+        cursor = connection.cursor(pymysql.cursors.DictCursor)
+        if request.method == 'POST':
+            search_word = request.form['search_word']
+            if search_word == '':
+                sql = "select * from vehicle_service order by service_id desc"
+                cursor.execute(sql)
+                services = cursor.fetchall()
+                count = cursor.rowcount
+                print(services)
+                return jsonify({'htmlresponse': render_template('views/servicesresponse.html',
+                                                                services=services, count=count)})
+            else:
+                sql = ''' select * from vehicle_service WHERE reg_no  LIKE '%{}%' 
+                or scheduled_date LIKE '%{}%'  or services LIKE '%{}%' or status LIKE '%{}%'  
+                ORDER BY service_id DESC  '''.format(search_word, search_word, search_word, search_word)
+                cursor.execute(sql)
+                services = cursor.fetchall()
+                count = cursor.rowcount
+                print(services)
+                return jsonify({'htmlresponse': render_template('views/servicesresponse.html',
+                                                                services=services, count=count)})
+        else:
+            return render_template('views/servicesUI.html')
+    else:
+        return redirect('/login')
+
+
+
+@app.route('/servicecomplete/<service_id>')
+def servicecomplete():
+    return render_template('admin/servicecomplete.html')
+
+
 app.run(debug=True)

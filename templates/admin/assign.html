@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <!-- CSS only -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css"
+rel="stylesheet"
+integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT"
+crossorigin="anonymous">
+<script src="https://kit.fontawesome.com/bc4d7d5bce.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="{{url_for('static', filename = 'css/style.css')}}">
+</head>
+<body>
+    <div class="container-fluid">
+         <div class="row">
+                <!-- sidebar -->
+                  {% include 'sidebar.html'%}
+                <!-- end sidebar -->
+                <!-- top bar -->
+                <div class="col-md-10 col-sm-11 col-lg-9">
+                        {% include 'topbar.html'%}
+                        <div class="row">
+                              <h4>Assign</h4>
+                              <b>Driver ID: {{session['driver_id']}}</b> <br>
+                              <b>Reg No: {{session['reg_no']}}</b> <br>
+                              <div class="col-md-6 card p-4 shadow ms-3">
+                                    <form id="assignForm">
+                                        <input type="hidden" id="driver_id" value="{{session['driver_id']}}">
+                                        <input type="hidden" id="reg_no" value="{{session['reg_no']}}">
+                                        <br>
+                                        <input type="text" id="from"
+                                             placeholder="Enter Departure"
+                                             class="form-control"> <br>
+
+                                         <input type="text" id="to"
+                                             placeholder="Enter Destination"
+                                             class="form-control"> <br>
+
+                                        <label for="scheduled_date">Date</label> <br>
+                                         <input type="date" id="scheduled_date"
+                                             placeholder="Enter Departure" class="form-control"> <br>
+
+                                        <label for="scheduled_time">Time</label> <br>
+                                         <input type="time" id="scheduled_time" class="form-control"> <br>
+                                      <input type="submit" value="Assign"
+                                             class="btn btn-info text-white">
+                                  </form>
+                                  <br>
+                                  <!-- Below will show ajax responses -->
+                                  <span style="color:red" id="errorAlert"></span>
+                                  <span style="color:green" id="successAlert"></span>
+                              </div>
+                        </div>
+               </div>
+         </div>
+    </div>
+    <!-- above last div -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+    <script src="{{url_for('static', filename = 'js/assign.js')}}"></script>
+<script>
+     $(document).ready(function(){
+          $("#mybutton").click(function(){
+                 $("#navigation").toggleClass("hide")
+          });
+     });
+</script>
+
+
+    <!-- JavaScript Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js"
+integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8"
+crossorigin="anonymous"></script>
+
+
+</body>
+</html>

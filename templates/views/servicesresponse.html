@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+     <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <title>Services</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
+
+      <style>
+        .tablrre {
+            table-layout:fixed;
+        }
+
+        .hscroll{
+            overflow-x:auto;
+        }
+    </style>
+</head>
+<body>
+      <h5>{{count}} Records Found</h5>
+      <div class="hscroll">
+            <table class="table table-responsive" style="font-size:14px;">
+            <tr>
+                <th>Reg no</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Services</th>
+                <th>Status</th>
+                <th>Reg Date</th>
+            </tr>
+            {% for service in services %}
+                 <tr>
+                     <td>{{service.reg_no}}</td>
+                     <td>{{service.scheduled_date}}</td>
+                     <td>{{service.scheduled_time}}</td>
+                     <td>{{service.services}}</td>
+                     <td>
+                         {% if service.status == "Pending" %}
+                            <span class="badge bg-warning">Pending</span>
+                            <br>
+                            {% if session['role'] == 'mechanic'%}
+                                 <a href="/servicecomplete/{{service.service_id}}">Process</a>
+                            {% endif %}
+                         {% elif service.status == "Ongoing"  %}
+                            <span class="badge bg-info">Ongoing</span>
+                         {% elif service.status == "Completed"  %}
+                            <span class="badge bg-success">Completed</span>
+                         {% endif %}
+                     </td>
+                     <td>{{service.reg_date}}</td>
+                 </tr>
+            {% endfor %}
+
+      </table>
+      </div>
+
+</body>
+</html>

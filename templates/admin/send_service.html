@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <!-- CSS only -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css"
+rel="stylesheet"
+integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT"
+crossorigin="anonymous">
+<script src="https://kit.fontawesome.com/bc4d7d5bce.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="{{url_for('static', filename = 'css/style.css')}}">
+</head>
+<body>
+    <div class="container-fluid">
+         <div class="row">
+                <!-- sidebar -->
+                  {% include 'sidebar.html'%}
+                <!-- end sidebar -->
+                <!-- top bar -->
+                <div class="col-md-10 col-sm-11 col-lg-9">
+                        {% include 'topbar.html'%}
+                        <div class="row">
+                              <h4>Create Service</h4>
+                              <div class="col-md-6 card p-4 shadow ms-3">
+                                    Reg No : {{session['reg_no']}} <br>
+                                    <form id="serviceForm">
+                                      <input type="hidden" id="reg_no"
+                                             value="{{session['reg_no']}}">
+
+                                         <label for="scheduled_date">Date</label> <br>
+                                         <input type="date" id="scheduled_date"
+                                             placeholder="Enter Departure" class="form-control"> <br>
+
+                                        <label for="scheduled_time">Time</label> <br>
+                                         <input type="time" id="scheduled_time" class="form-control"> <br>
+                                         <br>
+
+                                        <br>
+                                            <label for="list">Select Select Services Below</label>
+                                            <select id="list" name="list" multiple class="form-control">
+                                                 <option value="Suspension">Suspension</option>
+                                                 <option value="Brakes">Brakes</option>
+                                                 <option value="Springs">Springs</option>
+                                                 <option value="Springs">Oil Filter</option>
+                                                 <option value="Springs">Air Filter</option>
+                                                 <option value="Springs">Tyres</option>
+                                            </select><br>
+                                            <button id="btnRemove" class="btn btn-link">Remove Selected</button>
+                                            <br><br>
+
+                                      <input type="submit" value="Submit Service"
+                                             class="btn btn-info">
+                                  </form>
+                                  <br>
+                                  <!-- Below will show ajax responses -->
+                                  <span style="color:red" id="errorAlert"></span>
+                                  <span style="color:green" id="successAlert"></span>
+                              </div>
+                        </div>
+               </div>
+         </div>
+    </div>
+    <!-- above last div -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+    <script src="{{url_for('static', filename = 'js/addservice.js')}}"></script>
+<script>
+     $(document).ready(function(){
+          $("#mybutton").click(function(){
+                 $("#navigation").toggleClass("hide")
+          });
+     });
+</script>
+
+<script>
+            const btnAdd = document.querySelector('#btnAdd');
+const btnRemove = document.querySelector('#btnRemove');
+const listbox = document.querySelector('#list');
+const framework = document.querySelector('#framework');
+
+btnAdd.onclick = (e) => {
+  e.preventDefault();
+
+  // validate the option
+  if (framework.value == '') {
+    alert('Please enter the name.');
+    return;
+  }
+  // create a new option
+  const option = new Option(framework.value, framework.value);
+  // add it to the list
+  listbox.add(option, undefined);
+
+  // reset the value of the input
+  framework.value = '';
+  framework.focus();
+};
+
+// remove selected option
+btnRemove.onclick = (e) => {
+  e.preventDefault();
+
+  // save the selected options
+  let selected = [];
+
+  for (let i = 0; i < listbox.options.length; i++) {
+    selected[i] = listbox.options[i].selected;
+  }
+
+  // remove all selected option
+  let index = listbox.options.length;
+  while (index--) {
+    if (selected[index]) {
+      listbox.remove(index);
+    }
+  }
+};
+        </script>
+    <!-- JavaScript Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js"
+integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8"
+crossorigin="anonymous"></script>
+
+
+</body>
+</html>
